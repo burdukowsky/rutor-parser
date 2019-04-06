@@ -68,14 +68,39 @@ public class MainController {
 
         trs.forEach(tr -> {
             Elements tds = tr.select("td");
-            if (tds == null || tds.size() < 2) {
+            if (tds == null) {
                 throw new ParseException();
             }
-            Elements as = tds.get(1).select("a");
-            if (as == null || as.size() < 3) {
+            var tdsSize = tds.size();
+            if (tdsSize != 4 && tdsSize != 5) {
                 throw new ParseException();
             }
-            results.add(new Result(as.get(2).text(), as.get(1).attr("href")));
+
+            Elements secondTdAs = tds.get(1).select("a");
+            if (secondTdAs == null || secondTdAs.size() < 3) {
+                throw new ParseException();
+            }
+
+            var title = secondTdAs.get(2).text();
+            var magnet = secondTdAs.get(1).attr("href");
+
+            var size = tds.get(tdsSize - 2).text();
+
+            Element lastTd = tds.last();
+            Elements lastTdSpans = lastTd.select("span");
+            if (lastTdSpans == null || lastTdSpans.size() < 2) {
+                throw new ParseException();
+            }
+
+            long seeds, leaches;
+            try {
+                seeds = Utils.stringToLong(lastTdSpans.first().text());
+                leaches = Utils.stringToLong(lastTdSpans.get(1).text());
+            } catch (NumberFormatException e) {
+                throw new ParseException();
+            }
+
+            results.add(new Result(title, magnet, size, seeds, leaches));
         });
 
         return results;
