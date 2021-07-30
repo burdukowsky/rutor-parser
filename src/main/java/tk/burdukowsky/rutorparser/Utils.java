@@ -46,8 +46,7 @@ public class Utils {
         }
 
         // The engine is now ready to be used to evaluate the PAC script
-        var pac = doGet("https://antizapret.prostovpn.org/proxy.pac");
-        engine.eval(pac);
+        engine.eval(downloadPacContent("https://antizapret.prostovpn.org/proxy.pac"));
 
         // Now let's use the FindProxyForURL function to get the proxy
         // for the URL we want to access
@@ -84,21 +83,64 @@ public class Utils {
         return sb.toString();
     }
 
-    public static String doGet(String path) throws IOException {
-        var url = new URL(path);
-        var urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setConnectTimeout(10000);
-        urlConnection.setRequestMethod("GET");
-        var br = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-        var sb = new StringBuilder();
-        String output;
-        var lineSeparator = System.lineSeparator();
-        while ((output = br.readLine()) != null) {
-            sb.append(output);
-            sb.append(lineSeparator);
+    public static HttpURLConnection setupHTTPConnection(String url) throws IOException {
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection(Proxy.NO_PROXY);
+        con.setConnectTimeout(10000);
+        con.setReadTimeout(10000);
+        con.setInstanceFollowRedirects(true);
+        con.setRequestProperty("accept", "application/x-ns-proxy-autoconfig, */*;q=0.8");
+        return con;
+    }
+
+    public static String parseCharsetFromHeader(String contentType) {
+        String result = "ISO-8859-1";
+        if (contentType != null) {
+            String[] paramList = contentType.split(";");
+            for (String param : paramList) {
+                if (param.toLowerCase().trim().startsWith("charset") && param.contains("=")) {
+                    result = param.substring(param.indexOf("=") + 1).trim();
+                }
+            }
         }
-        urlConnection.disconnect();
-        return sb.toString();
+        return result;
+    }
+
+    public static BufferedReader getReader(HttpURLConnection con) throws IOException {
+        String charsetName = parseCharsetFromHeader(con.getContentType());
+        return new BufferedReader(new InputStreamReader(con.getInputStream(), charsetName));
+    }
+
+    public static String readAllContent(BufferedReader r) throws IOException {
+        StringBuilder result = new StringBuilder();
+        String line;
+        var lineSeparator = System.lineSeparator();
+        while ((line = r.readLine()) != null) {
+            result.append(line).append(lineSeparator);
+        }
+        return result.toString();
+    }
+
+    public static String downloadPacContent(String url) throws IOException {
+        if (url == null) {
+            throw new IOException("Invalid PAC script URL: null");
+        }
+
+        HttpURLConnection con = null;
+        try {
+            con = setupHTTPConnection(url);
+            if (con.getResponseCode() != 200) {
+                throw new IOException("Server returned: " + con.getResponseCode() + " " + con.getResponseMessage());
+            }
+
+            BufferedReader r = getReader(con);
+            String result = readAllContent(r);
+            r.close();
+            return result;
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+        }
     }
 
     public static Proxy buildProxyFromPacResult(String pacResult) {
