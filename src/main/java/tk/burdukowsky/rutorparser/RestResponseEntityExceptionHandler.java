@@ -24,11 +24,13 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(ParseException.class)
-    protected ResponseEntity<ApiError> handleParseException() {
-        return new ResponseEntity<>(
-                new ApiError("Ошибка синтаксического разбора ответа от " + config.getRutorDomain()),
-                HttpStatus.INTERNAL_SERVER_ERROR
+    protected ResponseEntity<ApiError> handleParseException(ParseException e) {
+        var message = String.format(
+                "Ошибка синтаксического разбора ответа от %s. Причина: %s",
+                config.getRutorDomain(),
+                e.getMessage()
         );
+        return new ResponseEntity<>(new ApiError(message), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

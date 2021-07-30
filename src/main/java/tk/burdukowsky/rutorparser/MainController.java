@@ -43,25 +43,25 @@ public class MainController {
         }
 
         if (doc == null) {
-            throw new ParseException();
+            throw new ParseException("document not found");
         }
 
         Element body = doc.body();
 
         if (body == null) {
-            throw new ParseException();
+            throw new ParseException("body not found");
         }
 
         Element index = body.getElementById("index");
 
         if (index == null) {
-            throw new ParseException();
+            throw new ParseException("element with id=\"index\" not found");
         }
 
         Elements trs = index.select("tr:not(.backgr)");
 
         if (trs == null) {
-            throw new ParseException();
+            throw new ParseException("table rows not found");
         }
 
         var results = new ArrayList<Result>();
@@ -69,16 +69,16 @@ public class MainController {
         trs.forEach(tr -> {
             Elements tds = tr.select("td");
             if (tds == null) {
-                throw new ParseException();
+                throw new ParseException("row cells not found");
             }
             var tdsSize = tds.size();
             if (tdsSize != 4 && tdsSize != 5) {
-                throw new ParseException();
+                throw new ParseException("wrong row cells number");
             }
 
             Elements secondTdAs = tds.get(1).select("a");
             if (secondTdAs == null || secondTdAs.size() < 3) {
-                throw new ParseException();
+                throw new ParseException("wrong links at second row cell");
             }
 
             var title = secondTdAs.get(2).text();
@@ -89,7 +89,7 @@ public class MainController {
             Element lastTd = tds.last();
             Elements lastTdSpans = lastTd.select("span");
             if (lastTdSpans == null || lastTdSpans.size() < 2) {
-                throw new ParseException();
+                throw new ParseException("wrong spans at last row cell");
             }
 
             long seeds, leaches;
@@ -97,7 +97,7 @@ public class MainController {
                 seeds = Utils.stringToLong(lastTdSpans.first().text());
                 leaches = Utils.stringToLong(lastTdSpans.get(1).text());
             } catch (NumberFormatException e) {
-                throw new ParseException();
+                throw new ParseException("seeds & leaches parse error");
             }
 
             results.add(new Result(title, magnet, size, seeds, leaches));
