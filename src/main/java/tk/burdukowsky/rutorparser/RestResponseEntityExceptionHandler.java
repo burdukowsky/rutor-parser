@@ -33,4 +33,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(new ApiError(message), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(InternalException.class)
+    protected ResponseEntity<ApiError> handleInternalException(InternalException e) {
+        return new ResponseEntity<>(new ApiError(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

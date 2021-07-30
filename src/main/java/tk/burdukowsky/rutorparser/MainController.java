@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+
+import static tk.burdukowsky.rutorparser.Utils.getProxies;
 
 @RestController
 public class MainController {
@@ -31,10 +34,23 @@ public class MainController {
                 UriUtils.encode(query, "UTF-8")
         );
 
+        List<Proxy> proxies;
+        try {
+            proxies = getProxies(requestUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new InternalException("Ошибка подбора прокси-сервера");
+        }
+        if (proxies.isEmpty()) {
+            throw new InternalException("Не найден подходящий прокси-сервер");
+        }
+        var proxy = proxies.get(0);
+
         Document doc;
         try {
             doc = Jsoup
                     .connect(requestUrl)
+                    .proxy(proxy)
                     .timeout(config.getTimeout())
                     .get();
         } catch (IOException e) {
