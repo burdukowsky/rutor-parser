@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.1.4.RELEASE'
+    id 'org.springframework.boot' version '2.3.12.RELEASE'
     id 'java'
     id 'war'
 }
@@ -8,7 +8,7 @@ apply plugin: 'io.spring.dependency-management'
 
 group = 'tk.burdukowsky'
 version = '2.0.0'
-sourceCompatibility = '11'
+sourceCompatibility = '14'
 
 repositories {
     mavenCentral()
