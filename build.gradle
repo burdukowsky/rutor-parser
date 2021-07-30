@@ -18,5 +18,5 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    compile('org.jsoup:jsoup:1.7.2')
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.7.2'
 }
