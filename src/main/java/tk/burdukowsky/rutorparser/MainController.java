@@ -4,25 +4,27 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriUtils;
 
 import java.io.IOException;
-import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
-
-import static tk.burdukowsky.rutorparser.Utils.getProxies;
 
 @RestController
 public class MainController {
 
+    private static final Logger log = LoggerFactory.getLogger(MainController.class);
     private final Config config;
+    private final ProxyProvider proxyProvider;
 
-    public MainController(Config config) {
+    public MainController(Config config, ProxyProvider proxyProvider) {
         this.config = config;
+        this.proxyProvider = proxyProvider;
     }
 
     @GetMapping("/{query}")
@@ -34,17 +36,7 @@ public class MainController {
                 UriUtils.encode(query, "UTF-8")
         );
 
-        List<Proxy> proxies;
-        try {
-            proxies = getProxies(requestUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new InternalException("Ошибка подбора прокси-сервера");
-        }
-        if (proxies.isEmpty()) {
-            throw new InternalException("Не найден подходящий прокси-сервер");
-        }
-        var proxy = proxies.get(0);
+        var proxy = proxyProvider.getProxy();
 
         Document doc;
         try {
@@ -54,8 +46,14 @@ public class MainController {
                     .timeout(config.getTimeout())
                     .get();
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new BadGatewayException(e);
+            String message;
+            if (proxy == null) {
+                message = String.format("Ошибка запроса к %s без помощи прокси", requestUrl);
+            } else {
+                message = String.format("Ошибка запроса к %s с помощью прокси %s", requestUrl, proxy);
+            }
+            log.error(message, e);
+            throw new BadGatewayException(message);
         }
 
         if (doc == null) {

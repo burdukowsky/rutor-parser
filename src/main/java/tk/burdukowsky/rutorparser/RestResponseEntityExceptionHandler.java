@@ -16,9 +16,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(BadGatewayException.class)
-    protected ResponseEntity<ApiError> handleBadGatewayException() {
+    protected ResponseEntity<ApiError> handleBadGatewayException(BadGatewayException e) {
         return new ResponseEntity<>(
-                new ApiError("Ошибка запроса к " + config.getRutorDomain()),
+                new ApiError(e.getMessage()),
                 HttpStatus.BAD_GATEWAY
         );
     }
