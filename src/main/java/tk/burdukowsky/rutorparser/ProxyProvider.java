@@ -2,6 +2,7 @@ package tk.burdukowsky.rutorparser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import java.util.List;
 import static tk.burdukowsky.rutorparser.Utils.getProxies;
 
 @Component
+@ConditionalOnProperty(value = "config.proxy-enabled", matchIfMissing = true, havingValue = "true")
 public class ProxyProvider {
 
     private static final Logger log = LoggerFactory.getLogger(ProxyProvider.class);

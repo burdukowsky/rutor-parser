@@ -7,6 +7,7 @@ public class Config {
     private String rutorDomain;
     private String protocol;
     private int timeout;
+    private boolean proxyEnabled;
 
     public String getRutorDomain() {
         return rutorDomain;
@@ -30,5 +31,13 @@ public class Config {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    public boolean isProxyEnabled() {
+        return proxyEnabled;
+    }
+
+    public void setProxyEnabled(boolean proxyEnabled) {
+        this.proxyEnabled = proxyEnabled;
     }
 }

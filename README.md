@@ -12,12 +12,12 @@ AdoptOpenJDK 14.0.2
 ## Собрать образ (выполняется после ручной сборки jar)
 
 ```
-docker build -t rutor_parser:2.1.0 .
+docker build -t rutor_parser:2.2.0 .
 ```
 
 ## Запуск
 ```
-docker run -d -p 8080:8080 --restart always --name rutor_parser rutor_parser:2.1.0
+docker run -d -p 8080:8080 --restart always --name rutor_parser rutor_parser:2.2.0
 ```
 
 ## Остановка

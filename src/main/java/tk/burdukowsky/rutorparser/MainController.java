@@ -14,15 +14,16 @@ import org.springframework.web.util.UriUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class MainController {
 
     private static final Logger log = LoggerFactory.getLogger(MainController.class);
     private final Config config;
-    private final ProxyProvider proxyProvider;
+    private final Optional<ProxyProvider> proxyProvider;
 
-    public MainController(Config config, ProxyProvider proxyProvider) {
+    public MainController(Config config, Optional<ProxyProvider> proxyProvider) {
         this.config = config;
         this.proxyProvider = proxyProvider;
     }
@@ -36,7 +37,7 @@ public class MainController {
                 UriUtils.encode(query, "UTF-8")
         );
 
-        var proxy = proxyProvider.getProxy();
+        var proxy = proxyProvider.map(ProxyProvider::getProxy).orElse(null);
 
         Document doc;
         try {
